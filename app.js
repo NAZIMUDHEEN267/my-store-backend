@@ -5,12 +5,16 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const cors = require("cors");
 require("dotenv").config();
 
 const categoryRoute = require("./routes/category");
 const orderRoute = require("./routes/order");
 const productRoute = require("./routes/products");
 const userRoute = require("./routes/user");
+
+app.use(cors());
+app.options("*", cors());
 
 // database url
 const DB_URL = process.env.MONGO_URL;

@@ -5,7 +5,7 @@ const path = require("path");
 const Products = require("../models/products");
 
 router.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../", "/index.html"));
+    res.sendFile(path.join(__dirname,"../","/index.html"));
 })
 
 router.post("/", (req, res) => {
