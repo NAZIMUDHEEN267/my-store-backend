@@ -12,7 +12,6 @@ const categoryRoute = require("./routes/category");
 const orderRoute = require("./routes/order");
 const productRoute = require("./routes/products");
 const userRoute = require("./routes/user");
-const anotherRoute = require("./routes/another");
 
 app.use(cors());
 app.options("*", cors());
@@ -22,8 +21,8 @@ const DB_URL = process.env.MONGO_URL;
 const API_URL = `${process.env.API_URL}`;
 
 // middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(morgan("tiny"));
 
 // routes middleware
