@@ -12,6 +12,7 @@ const categoryRoute = require("./routes/category");
 const orderRoute = require("./routes/order");
 const productRoute = require("./routes/products");
 const userRoute = require("./routes/user");
+const anotherRoute = require("./routes/another");
 
 app.use(cors());
 app.options("*", cors());
