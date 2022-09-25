@@ -43,10 +43,6 @@ router.post("/", async (req, res) => {
             res.status(200).send(data)
         }
     })
-
-    if (!category) {
-        return res.status(404).send("The category not created!!");
-    }
 })
 
 router.delete("/:id", (req, res) => {

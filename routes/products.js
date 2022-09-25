@@ -3,60 +3,54 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
-const Products = require("../models/products");
 const multer = require("multer");
 
-const storage = multer.diskStorage({destination: (req, file, cb) => {
-    cb(null, file.filename + '-' + Date.now());
-}})
+const Products = require("../models/products");
+const Category = require("../models/category");
+const User = require("../models/user");
+const { default: mongoose } = require("mongoose");
 
-const upload = multer({storage})
+// router.get("/", async (req, res) => {
+//     await Products.find()
+//     .then(data => {
+//         res.json(data);
+//     }).catch(err => {
+//         res.json(err);
+//     })
+// })
 
-router.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname,"../","/index.html"));
+router.get("/:id", async (req, res) => {
+    await Products.findById(req.params.id).populate("category")
+    .then(data => res.json(data))
+    .catch(err => res.catch(err))
 })
 
-router.post("/", upload.single('image'),(req, res) => {
-    // console.log(req.body);
-    const products = {
+router.post("/", async (req, res) => {
+    const categoryValid = mongoose.Types.ObjectId.isValid(req.query.category);
+    const userValid = mongoose.Types.ObjectId.isValid(req.query.user);
+
+    console.log("categoryBody: " + req.body.category, "userBody: " + req.body.user);
+    console.log("categoryValid: " + categoryValid, "userValid: " + userValid);
+
+    const products = await Products({
         name: req.body.name,
-        image: {
-            data: fs.readFileSync(path.join(__dirname, '../', '/uploads')),
-            contentType: 'image/jpeg'
-        },
-        countInStock: req.body.countInStock
-    }
-
-    Products.create(products, (err, data) => {
-        if(err) res.json(err);
-        else res.redirect("/api/v1/category")
-    })
-
-    Products.find({}, (err, data) => { 
-        if(err) {
-            res.json({message: "error occurred"})
-        } else {
-            res.json({data})
-        }
-     })
-})
-
-router.delete("/", async (req, res) => { 
-    await Products.findByIdAndDelete(req.query.id).then(data => {
-        res.json(data)
-    })
-});
-
-router.put("/", async (req, res) => {
-    await Products.findByIdAndUpdate(req.query.id, {
-        name: req.body.name,
+        description: req.body.description,
+        richDescription: req.body.richDescription,
         image: req.body.image,
-        counterInStock: req.body.counterInStock
-    }).then(data => {
-        res.json(data);
-    }).catch(err => {
-        res.json(err);
+        brand: req.body.brand,
+        price: req.body.price,
+        category: req.body.category,
+        countInStock: req.body.counterInStock,
+        rating: req.body.rating,
+        reviews: req.body.reviews,
+        isFeatured: req.body.isFeatured,
+        user: req.body.user
+    });
+
+    products.save((err, data) => {
+        if (err) res.status(400).send(err)
+        else res.status(200).send(data)
     })
-});
+})
 
 module.exports = router;
