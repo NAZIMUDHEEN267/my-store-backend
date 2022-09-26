@@ -9,7 +9,7 @@ const categorySchema = mongoose.Schema({
         type: String,
     },
     color: {
-        type: String
+        type: Number
     }
 })
 
