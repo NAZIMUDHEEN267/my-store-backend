@@ -7,7 +7,7 @@ const multer = require("multer");
 const mongoose = require("mongoose");
 
 const Products = require("../models/products");
-const Category = require("../models/category");
+const Categories = require("../models/category");
 
 // This function used for post, put request
 const inputObject = function () {
@@ -73,5 +73,15 @@ router.delete("/:id", async (req, res) => {
     .then(data => res.status(200).json({ data }))
     .catch(() => res.status(404).json({message: "Error"}))
 })
+
+// get products count from products collection
+router.get("/get/count", async (req, res) => { 
+    await Categories.countDocuments((count) => count, (err, count) => {
+        if(err) res.json({err})
+        else res.json({count})
+    })
+    .clone()
+    .catch(err => res.status(400).json({message: err}))
+ })
 
 module.exports = router;
