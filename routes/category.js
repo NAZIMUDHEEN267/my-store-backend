@@ -6,8 +6,9 @@ const Category = require("../models/category");
 
 // get request for get all documents from the category collection
 router.get("/", async (req, res) => {
-    const categoryList = await Category.find();
-    res.status(200).json(categoryList)
+    await Category.find()
+    .then(data => res.status(200).json(data))
+    .catch(err => res.status(400).json({"Error": err}))
 })
 
 // get request for get some specific documents with id parameter

@@ -26,10 +26,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan("tiny"));
 
 // routes middleware
-app.use(`${API_URL}/category`, categoryRoute);
-app.use(`${API_URL}/order`, orderRoute);
+app.use(`${API_URL}/categories`, categoryRoute);
+app.use(`${API_URL}/orders`, orderRoute);
 app.use(`${API_URL}/products`, productRoute);
-app.use(`${API_URL}/user`, userRoute);
+app.use(`${API_URL}/users`, userRoute);
 
 // database connection
 mongoose.connect(DB_URL, {

@@ -42,7 +42,7 @@ router.get("/:id", (req, res) => {
 
 // post request
 router.post("/", async (req, res) => {
-    Products.findById(req.body.category)
+    await Categories.findById(req.body.category)
     .catch(() => res.status(404).json({message: "Error"}))
 
     await Products(inputObject.call(req))
