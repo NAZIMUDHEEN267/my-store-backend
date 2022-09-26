@@ -41,11 +41,7 @@ router.get("/:id", (req, res) => {
 })
 
 // post request
-router.post("/:id", async (req, res) => {
-    if(!mongoose.isValidObjectId(req.params.id)) {
-        res.status(404).json({message: "Error"})
-    }
-
+router.post("/", async (req, res) => {
     Products.findById(req.body.category)
     .catch(() => res.status(404).json({message: "Error"}))
 
@@ -83,5 +79,23 @@ router.get("/get/count", async (req, res) => {
     .clone()
     .catch(err => res.status(400).json({message: err}))
  })
+
+// get request for specific property
+router.get("/get/featured/:count", async (req, res) => {
+    const count = req.params.count ? req.params.count : 0;
+
+    await Products.find({isFeatured: true}).limit(Number(count))
+    .then(data => res.status(200).json({data}))
+    .catch(err => res.json({message: err}))
+})
+
+// get request for user searched property or properties
+router.get("/get/featured/", async (req, res) => {
+    const property = Object.keys(req.query).length ? Object.keys(req.query) : [];
+
+    await Products.find({price: property}).limit(5)
+    .then(data => res.status(200).json({data}))
+    .catch(err => res.json({message: err}))
+})
 
 module.exports = router;
