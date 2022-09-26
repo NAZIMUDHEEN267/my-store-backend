@@ -9,9 +9,9 @@ const cors = require("cors");
 require("dotenv").config();
 
 const categoryRoute = require("./routes/category");
-const orderRoute = require("./routes/order");
+const orderRoute = require("./routes/orders");
 const productRoute = require("./routes/products");
-const userRoute = require("./routes/user");
+const userRoute = require("./routes/users");
 
 app.use(cors());
 app.options("*", cors());

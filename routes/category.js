@@ -2,22 +2,25 @@
 const express = require("express");
 const router = express.Router();
 const Category = require("../models/category");
-const path = require("path");
+// const path = require("path");
 
+// get request for get all documents from the category collection
 router.get("/", async (req, res) => {
     const categoryList = await Category.find();
-    res.json(categoryList)
+    res.status(200).json(categoryList)
 })
 
+// get request for get some specific documents with id parameter
 router.get("/:id", async (req, res) => {
     const category = await Category.findById(req.params.id);
     if (!category) {
         res.status(400).json({ success: true, message: "no category" })
     } else {
-        res.status(200).send(category)
+        res.status(200).json(category)
     }
 })
 
+// put request for get id based documents
 router.put("/:id", async (req, res) => {
     const category = await Category.findByIdAndUpdate(
         req.params.id,
@@ -25,10 +28,11 @@ router.put("/:id", async (req, res) => {
             name: req.body.name,
             icon: req.body.icon,
             color: req.body.color
-        }).then(data => res.send({"data": data}))
-        .catch(err => res.send({"Error": err}))
+        }).then(data => res.status(200).json({ "data": data }))
+        .catch(err => res.status(400).json({ "Error": err }))
 })
 
+// post request
 router.post("/", async (req, res) => {
     let category = await Category({
         name: req.body.name,
@@ -45,6 +49,7 @@ router.post("/", async (req, res) => {
     })
 })
 
+// delete request
 router.delete("/:id", (req, res) => {
     Category.findByIdAndRemove(req.params.id)
         .then(category => {

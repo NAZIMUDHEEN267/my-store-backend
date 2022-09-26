@@ -4,53 +4,74 @@ const router = express.Router();
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const mongoose = require("mongoose");
 
 const Products = require("../models/products");
 const Category = require("../models/category");
-const User = require("../models/user");
-const { default: mongoose } = require("mongoose");
 
-// router.get("/", async (req, res) => {
-//     await Products.find()
-//     .then(data => {
-//         res.json(data);
-//     }).catch(err => {
-//         res.json(err);
-//     })
-// })
+// This function used for post, put request
+const inputObject = function () {
+    return {
+        name: this.body.name,
+        description: this.body.description,
+        richDescription: this.body.richDescription,
+        image: this.body.image,
+        brand: this.body.brand,
+        price: this.body.price,
+        category: this.body.category,
+        countInStock: this.body.counterInStock,
+        rating: this.body.rating,
+        reviews: this.body.reviews,
+        isFeatured: this.body.isFeatured
+    }
+}
 
-router.get("/:id", async (req, res) => {
-    await Products.findById(req.params.id).populate("category")
-    .then(data => res.json(data))
-    .catch(err => res.catch(err))
+// get request for all documents 
+router.get("/", (req, res) => {
+    Products.find()
+        .populate("category")
+        .exec((err, data) => err ? res.status(404).json({message: "Error"}) : res.status(200).json({ data }))
 })
 
-router.post("/", async (req, res) => {
-    const categoryValid = mongoose.Types.ObjectId.isValid(req.query.category);
-    const userValid = mongoose.Types.ObjectId.isValid(req.query.user);
+// get request for specific id
+router.get("/:id", (req, res) => {
+    Products.findOne({ "category": req.params.id })
+        .populate("category")
+        .exec((err, data) => err ? res.status(404).json({message: "Error"}) : res.status(200).json({ data }))
+})
 
-    console.log("categoryBody: " + req.body.category, "userBody: " + req.body.user);
-    console.log("categoryValid: " + categoryValid, "userValid: " + userValid);
+// post request
+router.post("/:id", async (req, res) => {
+    if(!mongoose.isValidObjectId(req.params.id)) {
+        res.status(404).json({message: "Error"})
+    }
 
-    const products = await Products({
-        name: req.body.name,
-        description: req.body.description,
-        richDescription: req.body.richDescription,
-        image: req.body.image,
-        brand: req.body.brand,
-        price: req.body.price,
-        category: req.body.category,
-        countInStock: req.body.counterInStock,
-        rating: req.body.rating,
-        reviews: req.body.reviews,
-        isFeatured: req.body.isFeatured,
-        user: req.body.user
-    });
+    Products.findById(req.body.category)
+    .catch(() => res.status(404).json({message: "Error"}))
 
-    products.save((err, data) => {
-        if (err) res.status(400).send(err)
-        else res.status(200).send(data)
-    })
+    await Products(inputObject.call(req))
+    .save((err, data) => err ? res.status(404).json({message: "Error"}) : res.status(200).json({ data }));
+})
+
+// put request, updating with specific id parameter
+router.put("/:id", async (req, res) => {
+    if(!mongoose.isValidObjectId(req.params.id)) {
+        res.status(404).json({message: "Error"})
+    }
+
+    Products.findById(req.params.id)
+    .catch(() => res.status(404).json({message: "Error"}))
+
+    await Products.findByIdAndUpdate(req.params.id, inputObject.call(req))
+        .then(data => res.status(200).json({ data }))
+        .catch(err => res.status(404).json({message: "Error"}))
+})
+
+// delete request for remove one document
+router.delete("/:id", async (req, res) => {
+    await Products.findOneAndDelete(req.params.id)
+    .then(data => res.status(200).json({ data }))
+    .catch(() => res.status(404).json({message: "Error"}))
 })
 
 module.exports = router;
