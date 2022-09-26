@@ -4,14 +4,14 @@ const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
-router.get("/", async (req, res) => { 
+router.get("/", async (req, res) => {
     await User.find()
-    .then(data => {
-        res.status(200).json({data})
-    })
-    .catch(err => {
-        res.status(400).json({"Error": err})
-    })
+        .then(data => {
+            res.status(200).json({ data })
+        })
+        .catch(err => {
+            res.status(400).json({ "Error": err })
+        })
 })
 
 router.post("/", async (req, res) => {
@@ -27,16 +27,34 @@ router.post("/", async (req, res) => {
         city: req.body.city,
         country: req.body.country
     }).save()
-    .then(data => res.json(data))
-    .catch(err => res.json(err))
+        .then(data => res.json(data))
+        .catch(err => res.json(err))
 })
 
-router.get("/get/user/:name", (req, res) => { 
-    User.find({name: req.params.name.match(/^[A-Z]{1}[a-z]{3}/) ? req.params.name : null})
-    .exec((err, data) => {
-        if(err) res.status(400).json({"Error": err})
-        else res.status(200).json({data})
-    })
+router.get("/:user", async (req, res) => {
+    const user = await User.find({ name: req.params.user }).select("-passwdHash");
+
+    if (!user) {
+        res.json({ message: 'ad' })
+    }
+
+    res.json({ user })
+})
+
+router.post("/login", async (req, res) => { 
+    const user = await User.findOne({email: req.body.email});
+    console.log(user);
+
+    if(!user) {
+        res.status(400).json({message: "The user doesn't exist"})
+    }
+
+    if(user && bcrypt.compareSync(req.body.passwdHash, user.passwdHash)) {
+        res.status(200).json({message: "you are logged"});
+    }else {
+        res.status(400).json({message: "username or password wrong"});
+    }
+
  })
 
 module.exports = router;
