@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const expressJwt = require("../backend/helpers/jwt");
 
 const categoryRoute = require("./routes/category");
 const orderRoute = require("./routes/orders");
@@ -15,6 +16,7 @@ const userRoute = require("./routes/users");
 
 app.use(cors());
 app.options("*", cors());
+app.use(expressJwt());
 
 // database url
 const DB_URL = process.env.MONGO_URL;

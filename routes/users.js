@@ -3,9 +3,10 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 router.get("/", async (req, res) => {
-    await User.find()
+    await User.find().select("-passwdHash")
         .then(data => {
             res.status(200).json({ data })
         })
@@ -35,26 +36,27 @@ router.get("/:user", async (req, res) => {
     const user = await User.find({ name: req.params.user }).select("-passwdHash");
 
     if (!user) {
-        res.json({ message: 'ad' })
+        res.json({ message: 'The user does not exist' })
     }
 
     res.json({ user })
 })
 
-router.post("/login", async (req, res) => { 
-    const user = await User.findOne({email: req.body.email});
-    console.log(user);
+router.post("/login", async (req, res) => {
+    const user = await User.findOne({ email: req.body.email });
+    const SECRET = process.env.SECRET_TOKEN;
 
-    if(!user) {
-        res.status(400).json({message: "The user doesn't exist"})
+    if (!user) {
+        res.status(400).json({ message: "The user doesn't exist" })
     }
 
-    if(user && bcrypt.compareSync(req.body.passwdHash, user.passwdHash)) {
-        res.status(200).json({message: "you are logged"});
-    }else {
-        res.status(400).json({message: "username or password wrong"});
-    }
+    if (user && bcrypt.compareSync(req.body.passwdHash, user.passwdHash)) {
+        const token = jwt.sign({userId: user.id,}, SECRET, {expiresIn: "1w"});
+        res.status(200).json({token: token});
 
- })
+    } else {
+        res.status(400).json({ message: "username or password wrong" });
+    }
+})
 
 module.exports = router;
