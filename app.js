@@ -1,7 +1,6 @@
 
 const express = require("express");
 const app = express();
-const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -13,7 +12,6 @@ const categoryRoute = require("./routes/category");
 const orderRoute = require("./routes/orders");
 const productRoute = require("./routes/products");
 const userRoute = require("./routes/users");
-const errorHandler = require("./helpers/error-handler");
 
 app.use(cors());
 app.options("*", cors());

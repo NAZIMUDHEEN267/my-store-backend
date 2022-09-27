@@ -5,6 +5,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+// get request for list all user
 router.get("/", async (req, res) => {
     await User.find().select("-passwdHash")
         .then(data => {
@@ -15,6 +16,7 @@ router.get("/", async (req, res) => {
         })
 })
 
+// post request for register a user
 router.post("/signIn", async (req, res) => {
     const user = await User({
         name: req.body.name,
@@ -29,7 +31,7 @@ router.post("/signIn", async (req, res) => {
         country: req.body.country
     })
 
-    // checking if the user already signed in
+    // checking if the user already signed in with email
     const find = await User.findOne({ email: user.email })
 
     if (find) {
@@ -41,6 +43,7 @@ router.post("/signIn", async (req, res) => {
     }
 })
 
+// search a specific user with params
 router.get("/:user", async (req, res) => {
     const user = await User.find({ name: req.params.user }).select("-passwdHash");
 
@@ -51,6 +54,7 @@ router.get("/:user", async (req, res) => {
     res.json({ user })
 })
 
+// post request for login page
 router.post("/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     const SECRET = process.env.SECRET_TOKEN;
