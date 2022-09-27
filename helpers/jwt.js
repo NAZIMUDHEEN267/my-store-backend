@@ -5,6 +5,6 @@ module.exports = function () {
    const secret = process.env.SECRET_TOKEN;
    return expressjwt({
         secret,
-        algorithms: ['HS256']
+        algorithms: ['HS512']
    }); 
 }

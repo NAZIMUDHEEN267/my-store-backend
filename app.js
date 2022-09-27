@@ -1,18 +1,19 @@
 
 const express = require("express");
 const app = express();
-const path = require("path");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const expressJwt = require("../backend/helpers/jwt");
+const errHandler = require("./helpers/error-handler");
 
 const categoryRoute = require("./routes/category");
 const orderRoute = require("./routes/orders");
 const productRoute = require("./routes/products");
 const userRoute = require("./routes/users");
+const errorHandler = require("./helpers/error-handler");
 
 app.use(cors());
 app.options("*", cors());
@@ -39,6 +40,9 @@ mongoose.connect(DB_URL, {
     useUnifiedTopology: true,
     dbName: 'cluster1'
 })
+
+// Error handle middle ware
+app.use(errHandler);
 
 // port listening
 app.listen(8080, () => {

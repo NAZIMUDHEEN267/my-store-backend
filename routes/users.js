@@ -44,6 +44,7 @@ router.get("/:user", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
+    console.log(user);
     const SECRET = process.env.SECRET_TOKEN;
 
     if (!user) {
@@ -51,7 +52,7 @@ router.post("/login", async (req, res) => {
     }
 
     if (user && bcrypt.compareSync(req.body.passwdHash, user.passwdHash)) {
-        const token = jwt.sign({userId: user.id,}, SECRET, {expiresIn: "1w"});
+        const token = jwt.sign({userId: user.id,}, SECRET, {expiresIn: "1w", algorithm: "HS512"});
         res.status(200).json({token: token});
 
     } else {
