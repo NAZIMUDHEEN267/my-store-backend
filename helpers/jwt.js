@@ -6,5 +6,10 @@ module.exports = function () {
    return expressjwt({
         secret,
         algorithms: ['HS512']
-   }); 
+   }).unless({
+      path: [
+         "/api/v1/users/login",
+         "/api/v1/users/signIn"
+      ]
+   })
 }

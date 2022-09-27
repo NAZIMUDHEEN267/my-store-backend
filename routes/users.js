@@ -15,8 +15,8 @@ router.get("/", async (req, res) => {
         })
 })
 
-router.post("/", async (req, res) => {
-    await User({
+router.post("/signIn", async (req, res) => {
+    const user = await User({
         name: req.body.name,
         email: req.body.email,
         passwdHash: bcrypt.hashSync(req.body.passwdHash, 10),
@@ -27,9 +27,18 @@ router.post("/", async (req, res) => {
         zip: req.body.zip,
         city: req.body.city,
         country: req.body.country
-    }).save()
-        .then(data => res.json(data))
-        .catch(err => res.json(err))
+    })
+
+    // checking if the user already signed in
+    const find = await User.findOne({ email: user.email })
+
+    if (find) {
+        res.status(400).json({ err: `${find.email} already exist please login` })
+    } else {
+        user.save()
+            .then(data => res.status(200).json({ data }))
+            .catch(err => res.status(400).json({ err }))
+    }
 })
 
 router.get("/:user", async (req, res) => {
@@ -44,7 +53,6 @@ router.get("/:user", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
-    console.log(user);
     const SECRET = process.env.SECRET_TOKEN;
 
     if (!user) {
@@ -52,9 +60,8 @@ router.post("/login", async (req, res) => {
     }
 
     if (user && bcrypt.compareSync(req.body.passwdHash, user.passwdHash)) {
-        const token = jwt.sign({userId: user.id,}, SECRET, {expiresIn: "1w", algorithm: "HS512"});
-        res.status(200).json({token: token});
-
+        const token = jwt.sign({ userId: user.id, }, SECRET, { expiresIn: "1w", algorithm: "HS512" });
+        res.status(200).json({ token: token });
     } else {
         res.status(400).json({ message: "username or password wrong" });
     }
