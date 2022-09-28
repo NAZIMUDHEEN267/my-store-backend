@@ -16,6 +16,16 @@ router.get("/", async (req, res) => {
         })
 })
 
+// get products count from products collection
+router.get("/get/count", async (req, res) => { 
+    await User.countDocuments((count) => count, (err, count) => {
+        if(err) res.json({err})
+        else res.json({count: count - 1})
+    })
+    .clone()
+    .catch(err => res.status(400).json({message: err}))
+ })
+
 // post request for register a user
 router.post("/signIn", async (req, res) => {
     const user = await User({
@@ -38,8 +48,8 @@ router.post("/signIn", async (req, res) => {
         res.status(400).json({ err: `${find.email} already exist please login` })
     } else {
         user.save()
-            .then(data => res.status(200).json({ data }))
-            .catch(err => res.status(400).json({ err }))
+        .then(data => res.status(200).json({ data }))
+        .catch(err => res.status(400).json({ err }))
     }
 })
 
@@ -64,11 +74,17 @@ router.post("/login", async (req, res) => {
     }
 
     if (user && bcrypt.compareSync(req.body.passwdHash, user.passwdHash)) {
-        const token = jwt.sign({ userId: user.id, }, SECRET, { expiresIn: "1w", algorithm: "HS512" });
+        const token = jwt.sign({ userId: user.id, isAdmin: user.isAdmin}, SECRET, { expiresIn: "5h"});
         res.status(200).json({ token: token });
     } else {
         res.status(400).json({ message: "username or password wrong" });
     }
 })
+
+router.delete("/:id", (req, res) => { 
+    User.findByIdAndDelete(req.params.id)
+    .then(() => res.status(200).json({"message": "Data deleted"}))
+    .catch(err => res.status(400).json({err}))
+ })
 
 module.exports = router;
