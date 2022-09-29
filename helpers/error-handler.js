@@ -13,7 +13,7 @@ module.exports = function (err, req, res, next) {
             break;
         }
         default: {
-            res.status(500).json({ message: "General Error" })
+            res.status(500).json({ message: "General Error"})
             break;
         }
     }
