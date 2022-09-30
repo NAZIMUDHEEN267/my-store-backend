@@ -48,11 +48,13 @@ router.post("/", async (req, res) => {
         return newOrderItem._id;
     }));
 
-    const totalPrice = await Promise.all(orderItems.map(async itemId => {
+    const totalPrices = await Promise.all(orderItems.map(async itemId => {
         const orderItem = await OrderItems.findById(itemId).populate("Product");
         const totalPrice = orderItem.Product.price * orderItem.Quantity;
         return totalPrice;
     }));
+
+    const totalPrice = totalPrices.reduce((a, b) => a + b);
 
     const order = await Order({
         orderItems: orderItems,
@@ -63,7 +65,7 @@ router.post("/", async (req, res) => {
         country: req.body.country,
         phone: req.body.phone,
         status: req.body.status,
-        totalPrice: totalPrice.reduce((a, b) => a + b),
+        totalPrice: totalPrice,
         user: req.body.user
     });
 
@@ -102,5 +104,28 @@ router.delete("/:id", async (req, res) => {
             res.status(400).json({ "failed": "order not found" })
         })
 })
+
+// get all sales data
+router.get("/get/totalsales", async (req, res) => {
+    const totalSales = await Order.aggregate([
+        { $group: { "_id": null, totalSales: { $sum: "$totalPrice" } } }
+    ]);
+
+    if (!totalSales) {
+        return res.status(400).json({ "Error": "no totalSales available" });
+    }
+
+    res.send({ totalSales: totalSales.pop().totalSales })
+})
+
+// get all order count
+router.get("/get/count", async (req, res) => { 
+    await Order.countDocuments((count) => count, (err, count) => {
+        if(err) res.json({err})
+        else res.json({count})
+    })
+    .clone()
+    .catch(err => res.status(400).json({message: err}))
+ })
 
 module.exports = router;
