@@ -17,6 +17,8 @@ app.use(cors());
 app.options("*", cors());
 app.use(expressJwt());
 
+app.use('/public/uploads' ,express.static(__dirname + '/public/uploads'))
+
 // database url
 const DB_URL = process.env.MONGO_URL;
 const API_URL = `${process.env.API_URL}`;

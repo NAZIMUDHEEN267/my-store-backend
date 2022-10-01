@@ -20,8 +20,9 @@ module.exports = function () {
       isRevoked: getToken
    }).unless({
       path: [
-         { url: /\/api\/v1\/products(.*)/, method: ["GET", "OPTIONS"] },
+         { url: /\/public\/uploads(.*)/, method: ["GET", "OPTIONS"] },
          { url: /\/api\/v1\/categories(.*)/, method: ["GET", "OPTIONS"] },
+         {url: /\api\/v1\/products\//},
          `${API_URL}/users/login`,
          `${API_URL}/users/signIn`
       ]

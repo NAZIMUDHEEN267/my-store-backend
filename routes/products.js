@@ -78,49 +78,20 @@ router.post("/", uploadOption.single('image'), async (req, res) => {
     await Categories.findById(req.body.category)
         .catch(() => res.status(404).json({ message: "Error's category" }))
 
-        if(!req.file) {
-            res.status(400).json({"Error": "No file uploaded"})
-        }
-
-        // executing fileName
-        const fileName = req.file.filename;
-        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
-
-
-        await Products({
-            name: req.body.name,
-            description: req.body.description,
-            richDescription: req.body.richDescription,
-            image: `${basePath}${fileName}`,
-            brand: req.body.brand,
-            price: req.body.price,
-            category: req.body.category,
-            countInStock: req.body.countInStock,
-            rating: req.body.rating,
-            reviews: req.body.reviews,
-            isFeatured: req.body.isFeatured
-        })
-        .save().then(() => {
-            res.status(200).json({success: "saved to db"})
-        }).catch(() => {
-            res.status(400).json({Error: "not saved to db"})
-        })
-})
-
-// put request, updating with specific id parameter
-router.put("/:id", async (req, res) => {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-        res.status(404).json({ message: "Error" })
+    if (!req.file) {
+        res.status(400).json({ "Error": "No file uploaded" })
     }
 
-    Products.findById(req.params.id)
-        .catch(() => res.status(404).json({ message: "Error" }))
+    // executing fileName
+    const fileName = req.file.filename;
+    const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
-    await Products.findByIdAndUpdate(req.params.id, {
+
+    await Products({
         name: req.body.name,
         description: req.body.description,
         richDescription: req.body.richDescription,
-        image: req.body.image,
+        image: `${basePath}${fileName}`,
         brand: req.body.brand,
         price: req.body.price,
         category: req.body.category,
@@ -128,10 +99,77 @@ router.put("/:id", async (req, res) => {
         rating: req.body.rating,
         reviews: req.body.reviews,
         isFeatured: req.body.isFeatured
-    }).save()
-        .then(data => res.status(200).json({ data }))
-        .catch(err => res.status(404).json({ message: "Error" }))
+    })
+        .save().then(() => {
+            res.status(200).json({ success: "saved to db" })
+        }).catch(() => {
+            res.status(400).json({ Error: "not saved to db" })
+        })
 })
+
+// put request, updating with specific id parameter
+router.put("/:id", uploadOption.single('image'), async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        res.status(404).json({ message: "Error" })
+    }
+
+    await Products.findById(req.params.id)
+        .catch(() => res.status(404).json({ message: "Error" }))
+
+    if (!req.file) {
+        res.status(400).json({ "Error": "No file uploaded" })
+    }
+
+    // executing fileName
+    const fileName = req.file.filename;
+    const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+
+    await Products.findOneAndUpdate({"_id": req.params.id}, {
+        name: req.body.name,
+        description: req.body.description,
+        richDescription: req.body.richDescription,
+        image: `${fileName}${basePath}`,
+        brand: req.body.brand,
+        price: req.body.price,
+        category: req.body.category,
+        countInStock: req.body.countInStock,
+        rating: req.body.rating,
+        reviews: req.body.reviews,
+        isFeatured: req.body.isFeatured
+    }, (err, success) => {
+        if(err) {
+            res.status(400).json({"Error": "error"});
+        }
+        res.status(200).json({success})
+    }).clone();
+})
+
+// update for multiple files
+router.put("/gallery-image/:id",
+    uploadOption.array("images", 10),
+    async (req, res) => {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            res.status(404).json({ message: "Error" })
+        }
+
+        // input files
+        const files = req.files;
+        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+
+        let imagesPaths = [];
+        if (req.files) {
+            files.map(file => {
+                return imagesPaths.push(`${basePath}${file.filename}`);
+            })
+        }
+
+        await Products.findByIdAndUpdate(req.params.id, {
+            images: imagesPaths
+        }, (err, success) => {
+            if(err) res.status(400).json({err})
+            else res.status(200).json({success})
+        }).clone()
+    })
 
 // delete request for remove one document
 router.delete("/:id", async (req, res) => {
