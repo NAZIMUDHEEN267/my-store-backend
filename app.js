@@ -15,7 +15,7 @@ const userRoute = require("./routes/users");
 
 app.use(cors());
 app.options("*", cors());
-// app.use(expressJwt());
+app.use(expressJwt());
 
 // database url
 const DB_URL = process.env.MONGO_URL;

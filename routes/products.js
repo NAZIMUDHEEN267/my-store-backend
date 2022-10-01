@@ -9,19 +9,28 @@ const multer = require("multer");
 const Products = require("../models/products");
 const Categories = require("../models/category");
 
+const FILE_TYPE_CONFIG = {
+    "image/png": "png",
+    "image/jpeg": "jpeg",
+    "image/jpg": "jpg"
+}
+
 // uploading files manage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads');
+        const isValid = FILE_TYPE_CONFIG[file.mimetype];
+        const uploadErr = (isValid) ? null : new Error("uploaded file not valid");
+        cb(uploadErr, 'public/uploads');
     },
     filename: function (req, file, cb) {
+        const extension = FILE_TYPE_CONFIG[file.mimetype];
         const fileName = file.originalname.replace(" ", "-");
-        console.log();
-        cb(null, fileName.substring(0, fileName.lastIndexOf(".")) + "-" + Date.now() + path.extname(fileName) );
+        cb(null, `${fileName}-${Date.now()}.${extension}`);
     }
 })
 
 const uploadOption = multer({ storage: storage });
+
 // get request for all documents 
 router.get("/", (req, res) => {
     Products.find()
@@ -69,10 +78,14 @@ router.post("/", uploadOption.single('image'), async (req, res) => {
     await Categories.findById(req.body.category)
         .catch(() => res.status(404).json({ message: "Error's category" }))
 
+        if(!req.file) {
+            res.status(400).json({"Error": "No file uploaded"})
+        }
+
         // executing fileName
-        const ext = path.extname(req.file.filename.split("-")[0]);
         const fileName = req.file.filename;
-        const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
+        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+
 
         await Products({
             name: req.body.name,
