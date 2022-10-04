@@ -77,6 +77,21 @@ router.post("/", async (req, res) => {
     res.status(200).json({ order })
 })
 
+// get user requested order histories
+router.get("/get/userorders/:userid", async (req, res) => {
+    const userOrderList = await Order.find({user: req.params.userid})
+        .populate({
+            path: "orderItems", populate:
+                { path: "Product", populate: "category" }
+        }).sort({'dateOrdered': -1})
+
+    if (!userOrderList) {
+        res.status(200).json({ Error: "Error ocurred" })
+    }
+
+    res.status(400).json({ success: userOrderList })
+})
+
 // updated status on the order // only admin can access it
 router.put("/:id", async (req, res) => {
     await Order.findOneAndUpdate({ "_id": req.params.id }, { status: req.body.status }, (err, update) => {
@@ -118,13 +133,13 @@ router.get("/get/totalsales", async (req, res) => {
 })
 
 // get all order count
-router.get("/get/count", async (req, res) => { 
+router.get("/get/count", async (req, res) => {
     await Order.countDocuments((count) => count, (err, count) => {
-        if(err) res.json({err})
-        else res.json({count})
+        if (err) res.json({ err })
+        else res.json({ count })
     })
-    .clone()
-    .catch(err => res.status(400).json({message: err}))
- })
+        .clone()
+        .catch(err => res.status(400).json({ message: err }))
+})
 
 module.exports = router;
